@@ -54,38 +54,39 @@ class Products with ChangeNotifier {
     return _items.firstWhere((element) => element.id == id);
   }
 
-  Future<void> addProduct(Product product) {
+  Future<void> addProduct(Product product) async {
     const url =
-        'https://learn-flutter-shop-app-e5f4b-default-rtdb.asia-southeast1.firebasedatabase.app/products.json';
+        'https://learn-flutter-shop-app-e5f4b-default-rtdb.asia-southeast1.firebasedatabase.app/products';
 
-    return http
-        .post(
-      Uri.parse(url),
-      body: json.encode(
-        {
-          'title': product.title,
-          'description': product.description,
-          'imageUrl': product.imageUrl,
-          'price': product.price,
-          'isFavorite': product.isFavorite,
-        },
-      ),
-    )
-        .then(
-      (response) {
-        inspect(response);
-        var responseData = json.decode(response.body);
+    try {
+      var response = await http.post(
+        Uri.parse(url),
+        body: json.encode(
+          {
+            'title': product.title,
+            'description': product.description,
+            'imageUrl': product.imageUrl,
+            'price': product.price,
+            'isFavorite': product.isFavorite,
+          },
+        ),
+      );
 
-        final newProduct = Product(
-            id: responseData['name'],
-            title: product.title,
-            description: product.description,
-            price: product.price,
-            imageUrl: product.imageUrl);
-        _items.add(newProduct);
-        notifyListeners();
-      },
-    );
+      inspect(response);
+      var responseData = json.decode(response.body);
+
+      final newProduct = Product(
+          id: responseData['name'],
+          title: product.title,
+          description: product.description,
+          price: product.price,
+          imageUrl: product.imageUrl);
+      _items.add(newProduct);
+      notifyListeners();
+    } catch (error) {
+      print(error.toString());
+      throw error;
+    }
   }
 
   void updateProduct(String id, Product newProduct) {
